@@ -1,1 +1,1 @@
-# My Awesome Greeter
+# Laravel Typescript Session
