@@ -1,6 +1,6 @@
 import Crypto from '../crypto';
 import SessionClass from '../index';
-jest.mock('../crypto'); 
+jest.mock('../crypto');
 
 it('Check if Session called the class constructor', () => {
   const session = new SessionClass();

@@ -13,7 +13,7 @@ it('Check if item encrypted', () => {
 
 it('Check if item decrypted', () => {
   const crypto = new Crypto();
-  const item = "12345";
+  const item = '12345';
   const encryptedItem = crypto.encrypt(item);
   expect(typeof encryptedItem).toBe('string');
   const decryptedItem = crypto.decrypt(encryptedItem);

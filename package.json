@@ -1,6 +1,6 @@
 {
   "name": "laravel-ts-session",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A session class to mimic laravel sessions",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
