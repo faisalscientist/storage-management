@@ -1,144 +1,100 @@
 import Crypto from './crypto';
-export default class SessionClass {
-  public appName: string = 'laravel-ts-session';
-  private crypto: Crypto;
-  constructor() {
-    this.crypto = new Crypto();
-    this.appName = 'laravel-ts-session';
+import { SessionUtils } from './session-utils';
+export default class SessionClass extends SessionUtils {
+
+  constructor(
+  ) {
+    super(new Crypto);
   }
 
-  public put(name: string, value: any, returnValue?: any) {
-    if (!this.hasAppSession()) {
-      localStorage.setItem(this.appName, '');
-    }
+  public put(key: string, value: any, returnValue?: any) {
 
-    const appSession = this.getAppSession();
-    if (appSession === '' || appSession === undefined || appSession === null) {
-      const item: any = {};
-      item[name] = value;
-      const encryptItem = this.crypto.encrypt(item);
-      localStorage.setItem(this.appName, encryptItem);
-    } else {
-      const decryptAppSession = JSON.parse(this.crypto.decrypt(appSession));
-      decryptAppSession[`${name}`] = value;
-      const encryptAppSession = this.crypto.encrypt(decryptAppSession);
-      localStorage.setItem(this.appName, encryptAppSession);
-      // this._storage.set(this.appName, encryptAppSession, 1);
-    }
+    this.storeItem(key, value);
+    return this.returnValue(returnValue);
 
-    returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-    return returnValue;
   }
 
-  public get(name: string, returnValue?: any) {
-    // const value = this.crypto.decrypt(this._storage.get(this.appName));
-    if (this.hasAppSession()) {
-      const value = this.crypto.decrypt(localStorage.getItem(this.appName));
-      if (value === '' || value === null || value === undefined) {
-        returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-        return returnValue;
-      }
+  public get(key: string, returnValue?: any) {
+
+    const itemExists = this.findItem(key);
+    if(itemExists) {
+      const value = this.decrypt(this.getItem());
       const decryptAppSession = JSON.parse(value);
-      let sessionData = null;
-      for (const key in decryptAppSession) {
-        if (decryptAppSession.hasOwnProperty(name)) {
-          sessionData = decryptAppSession[name];
-        }
-      }
-      return sessionData;
-    } else {
-      returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-      return returnValue;
+      return decryptAppSession[key];
     }
+    return this.returnValue(returnValue);
+
   }
 
-  public forget(name: string, returnValue?: any) {
-    // const value = this.crypto.decrypt(this._storage.get(this.appName));
-    if (this.hasAppSession()) {
-      const value = this.crypto.decrypt(localStorage.getItem(this.appName));
-      if (value === '' || value === null || value === undefined) {
-        returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-        return returnValue;
-      }
-      const decryptAppSession = JSON.parse(value);
-      let sessionData = null;
-      for (const key in decryptAppSession) {
-        if (decryptAppSession.hasOwnProperty(name)) {
-          sessionData = decryptAppSession[name];
-          delete decryptAppSession[name];
-          const encryptAppSession = this.crypto.encrypt(decryptAppSession);
-          // this._storage.set(this.appName, encryptAppSession, 1);
-          localStorage.setItem(this.appName, encryptAppSession);
-          returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-          return returnValue;
-        }
-      }
-      return sessionData;
-    } else {
-      return false;
+  public forget(key: any, returnValue?: any) {
+    if(typeof key === 'string') {
+      key = [key];
     }
+    for (const iterator of key) {
+      const itemExists = this.findItem(iterator);
+      if(itemExists) {
+        const value = this.decrypt(this.getItem());
+        const decryptAppSession = JSON.parse(value);
+        delete decryptAppSession[iterator];
+        this.setItem(decryptAppSession);
+      }
+    }
+    return this.returnValue(returnValue);
   }
 
   public flush(returnValue?: any) {
-    // const value = this.crypto.decrypt(this._storage.get(this.appName));
-    if (this.hasAppSession()) {
-      const value = this.crypto.decrypt(localStorage.getItem(this.appName));
-      if (value === '' || value === null || value === undefined) {
-        returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-        return returnValue;
-      }
-      // return this._storage.deleteAll();
-      return localStorage.clear();
-    } else {
-      returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-      return returnValue;
-    }
+    this.clear();
+    return this.returnValue(returnValue);
   }
 
   public all(returnValue?: any) {
-    // const value = this.crypto.decrypt(this._storage.get(this.appName));
-    if (this.hasAppSession()) {
-      const value = this.crypto.decrypt(localStorage.getItem(this.appName));
-      if (value === '' || value === null || value === undefined) {
-        returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-        return returnValue;
-      }
-      const decryptAppSession = JSON.parse(value);
-      return decryptAppSession;
-    } else {
-      returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-      return returnValue;
+    if(this.getItem() === null || this.getItem() === undefined) {
+      return this.returnValue(returnValue);
     }
+    const value = this.decrypt(this.getItem());
+    return JSON.parse(value);
   }
 
-  public has(name: string, returnValue?: any) {
-    // const value = this.crypto.decrypt(this._storage.get(this.appName));
-    if (this.hasAppSession()) {
-      const value = this.crypto.decrypt(localStorage.getItem(this.appName));
-      if (value === '' || value === null || value === undefined) {
-        returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-        return returnValue;
-      }
+  public pull(key: string, returnValue?: any) {
+    const itemExists = this.findItem(key);
+    if(itemExists) {
+      const value = this.decrypt(this.getItem());
       const decryptAppSession = JSON.parse(value);
-      let sessionData = false;
-      for (const key in decryptAppSession) {
-        if (decryptAppSession.hasOwnProperty(name)) {
-          sessionData = true;
-        }
-      }
-      return sessionData;
-    } else {
-      returnValue = returnValue !== null && returnValue !== undefined ? returnValue : null;
-      return returnValue;
+      this.forget(key);
+      return decryptAppSession[key];
     }
+    return this.returnValue(returnValue);
   }
 
-  private getAppSession() {
-    return localStorage.getItem(this.appName);
+  public push(key: string, newvalue: any, returnValue?: any) {
+    const itemExists = this.findItem(key);
+    if(itemExists) {
+      const item = this.get(key);
+      let valueType = null;
+      item instanceof Array ? valueType = 'array' : (item instanceof Object ? valueType = 'object' : valueType = 'string');
+      switch(valueType) {
+        case 'array':
+          item.push(newvalue);
+          this.put(key, item);
+          break;
+        case 'object':
+          Object.assign(item, newvalue);
+          this.put(key, item);
+          break;
+        default:
+          const newItemArray = [item];
+          newItemArray.push(newvalue);
+          this.put(key, newItemArray);
+          break;
+      }
+    }
+    return this.returnValue(returnValue);
   }
 
-  private hasAppSession() {
-    // return this._storage.check(this.appName);
-    return localStorage.getItem(this.appName) !== null && localStorage.getItem(this.appName) !== undefined;
+  public has(key: string, returnValue?: any) {
+    const itemExists = this.findItem(key);
+    return itemExists ? itemExists : (returnValue ? returnValue : itemExists);
   }
 }
+
+
