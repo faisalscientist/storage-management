@@ -1,38 +1,32 @@
 import Crypto from './crypto';
 import { SessionUtils } from './session-utils';
 export default class SessionClass extends SessionUtils {
-
-  constructor(
-  ) {
-    super(new Crypto);
+  constructor() {
+    super(new Crypto());
   }
 
   public put(key: string, value: any, returnValue?: any) {
-
     this.storeItem(key, value);
     return this.returnValue(returnValue);
-
   }
 
   public get(key: string, returnValue?: any) {
-
     const itemExists = this.findItem(key);
-    if(itemExists) {
+    if (itemExists) {
       const value = this.decrypt(this.getItem());
       const decryptAppSession = JSON.parse(value);
       return decryptAppSession[key];
     }
     return this.returnValue(returnValue);
-
   }
 
   public forget(key: any, returnValue?: any) {
-    if(typeof key === 'string') {
+    if (typeof key === 'string') {
       key = [key];
     }
     for (const iterator of key) {
       const itemExists = this.findItem(iterator);
-      if(itemExists) {
+      if (itemExists) {
         const value = this.decrypt(this.getItem());
         const decryptAppSession = JSON.parse(value);
         delete decryptAppSession[iterator];
@@ -48,7 +42,7 @@ export default class SessionClass extends SessionUtils {
   }
 
   public all(returnValue?: any) {
-    if(this.getItem() === null || this.getItem() === undefined) {
+    if (this.getItem() === null || this.getItem() === undefined) {
       return this.returnValue(returnValue);
     }
     const value = this.decrypt(this.getItem());
@@ -57,7 +51,7 @@ export default class SessionClass extends SessionUtils {
 
   public pull(key: string, returnValue?: any) {
     const itemExists = this.findItem(key);
-    if(itemExists) {
+    if (itemExists) {
       const value = this.decrypt(this.getItem());
       const decryptAppSession = JSON.parse(value);
       this.forget(key);
@@ -68,11 +62,15 @@ export default class SessionClass extends SessionUtils {
 
   public push(key: string, newvalue: any, returnValue?: any) {
     const itemExists = this.findItem(key);
-    if(itemExists) {
+    if (itemExists) {
       const item = this.get(key);
       let valueType = null;
-      item instanceof Array ? valueType = 'array' : (item instanceof Object ? valueType = 'object' : valueType = 'string');
-      switch(valueType) {
+      item instanceof Array
+        ? (valueType = 'array')
+        : item instanceof Object
+        ? (valueType = 'object')
+        : (valueType = 'string');
+      switch (valueType) {
         case 'array':
           item.push(newvalue);
           this.put(key, item);
@@ -93,8 +91,6 @@ export default class SessionClass extends SessionUtils {
 
   public has(key: string, returnValue?: any) {
     const itemExists = this.findItem(key);
-    return itemExists ? itemExists : (returnValue ? returnValue : itemExists);
+    return itemExists ? itemExists : returnValue ? returnValue : itemExists;
   }
 }
-
-
