@@ -6,6 +6,7 @@ A typescript package that enables you to work with data in your localstorage (cu
 
 # Installation
 The prefered installation method is via npm. Run:
-> We're living the future so
-> the present is our past.
+```json
+   // code for coloring
+```
 
