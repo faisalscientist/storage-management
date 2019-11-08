@@ -45,7 +45,7 @@ export abstract class SessionUtils {
             return this.crypto.decrypt(item)
       }
 
-      protected findItem(key: string | Array<string>) {
+      protected findItem(key: any) {
             if (this.hasAppSession()) {
                   const value = this.decrypt(this.getItem());
                   if (value === '' || value === null || value === undefined) {
